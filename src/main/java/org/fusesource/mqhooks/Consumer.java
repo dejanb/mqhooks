@@ -20,6 +20,11 @@ import org.codehaus.jackson.annotate.JsonAutoDetect;
 import org.codehaus.jackson.annotate.JsonMethod;
 import org.codehaus.jackson.annotate.JsonProperty;
 
+import javax.jms.Destination;
+import javax.jms.JMSException;
+import javax.jms.Message;
+import javax.jms.MessageConsumer;
+import javax.jms.MessageListener;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
@@ -31,15 +36,17 @@ import java.net.URL;
 public class Consumer {
 
     @JsonProperty
-    String id;
+    Integer id;
     @JsonProperty
     URL url;
 
-    public String getId() {
+    MessageConsumer consumer;
+
+    public Integer getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -49,5 +56,19 @@ public class Consumer {
 
     public void setUrl(URL url) {
         this.url = url;
+    }
+
+    public MessageConsumer getConsumer() {
+        return consumer;
+    }
+
+    public void setConsumer(MessageConsumer consumer) throws JMSException {
+        consumer.setMessageListener(new MessageListener() {
+            @Override
+            public void onMessage(Message message) {
+                System.out.println(url + " <- " + message);
+            }
+        });
+        this.consumer = consumer;
     }
 }

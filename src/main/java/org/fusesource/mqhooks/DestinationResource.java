@@ -39,7 +39,7 @@ abstract public class DestinationResource {
     @Path("/{destination}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON})
-    public String createConsumer(@PathParam("destination")String destinationName, Consumer consumer) throws Exception {
+    public Integer createConsumer(@PathParam("destination")String destinationName, Consumer consumer) throws Exception {
         Destination destination = createDestination(destinationName);
         getService().addConsumer(destination, consumer);
         return consumer.getId();
@@ -48,7 +48,7 @@ abstract public class DestinationResource {
     @GET
     @Produces({MediaType.APPLICATION_JSON})
     @Path("/{destination}")
-    public HashMap<String, Consumer> getConsumers(@PathParam("destination")String destination) {
+    public HashMap<Integer, Consumer> getConsumers(@PathParam("destination")String destination) {
         return fetchConsumers(createDestination(destination));
     }
 
@@ -62,7 +62,7 @@ abstract public class DestinationResource {
         return rc.getResource(Service.class);
     }
 
-    public HashMap<String, Consumer> fetchConsumers(Destination destination) {
+    public HashMap<Integer, Consumer> fetchConsumers(Destination destination) {
         return getService().getConsumers(destination);
     }
 

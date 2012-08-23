@@ -17,34 +17,46 @@
 package org.fusesource.mqhooks;
 
 import com.sun.jersey.spi.resource.Singleton;
+import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.activemq.command.ActiveMQQueue;
 
+import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
+import javax.jms.JMSException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Singleton
 public class Service {
 
-    Map<Destination, HashMap<String, Consumer>> consumers = new HashMap<Destination, HashMap<String, Consumer>>();
-    Random rnd = new Random(); //temp key generator
+    Map<Destination, HashMap<Integer, Consumer>> consumers = new HashMap<Destination, HashMap<Integer, Consumer>>();
+    AtomicInteger id = new AtomicInteger(1);
+    JMSMessagingAgent messagingAgent;
 
-    public HashMap<String, Consumer> getConsumers(Destination destination) {
-        HashMap<String, Consumer> result = consumers.get(destination);
+    public Service() {
+        //TODO config mechanism for connection factory
+        ConnectionFactory factory = new ActiveMQConnectionFactory("tcp://localhost:61616");
+        messagingAgent = new JMSMessagingAgent(factory);
+    }
+
+    public HashMap<Integer, Consumer> getConsumers(Destination destination) {
+        HashMap<Integer, Consumer> result = consumers.get(destination);
         if (result == null) {
-            result = new HashMap<String, Consumer>();
+            result = new HashMap<Integer, Consumer>();
             consumers.put(destination, result);
         }
         return result;
     }
 
-    public String addConsumer(Destination destination, Consumer consumer) {
-        consumer.setId(createConsumer());
-        HashMap<String, Consumer> consumerList = getConsumers(destination);
+    public Integer addConsumer(Destination destination, Consumer consumer) throws JMSException {
+        consumer.setConsumer(messagingAgent.createConsumer(destination));
+        consumer.setId(id.getAndIncrement());
+        HashMap<Integer, Consumer> consumerList = getConsumers(destination);
         consumerList.put(consumer.getId(), consumer);
         return consumer.getId();
     }
@@ -53,11 +65,5 @@ public class Service {
         //TODO unsubscribe an actual consumer
         getConsumers(destination).remove(id);
     }
-
-    public String createConsumer() {
-        //TODO create an actual consumer
-        return String.valueOf(rnd.nextInt(100000));
-    }
-
 
 }
