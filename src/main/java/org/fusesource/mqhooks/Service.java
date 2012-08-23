@@ -61,9 +61,11 @@ public class Service {
         return consumer.getId();
     }
 
-    public void deleteConsumer(Destination destination, String id) {
-        //TODO unsubscribe an actual consumer
-        getConsumers(destination).remove(id);
+    public void deleteConsumer(Destination destination, Integer id) throws JMSException {
+        Consumer consumer =  getConsumers(destination).remove(id);
+        if (consumer != null) {
+            consumer.getConsumer().close();
+        }
     }
 
 }

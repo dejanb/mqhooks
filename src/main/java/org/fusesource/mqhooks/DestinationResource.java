@@ -19,6 +19,7 @@ package org.fusesource.mqhooks;
 import com.sun.jersey.api.core.ResourceContext;
 
 import javax.jms.Destination;
+import javax.jms.JMSException;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -39,7 +40,7 @@ abstract public class DestinationResource {
     @Path("/{destination}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON})
-    public Integer createConsumer(@PathParam("destination")String destinationName, Consumer consumer) throws Exception {
+    public Integer createConsumer(@PathParam("destination")String destinationName, Consumer consumer) throws JMSException {
         Destination destination = createDestination(destinationName);
         getService().addConsumer(destination, consumer);
         return consumer.getId();
@@ -54,7 +55,7 @@ abstract public class DestinationResource {
 
     @DELETE
     @Path("/{destination}/{id}")
-    public void getConsumer(@PathParam("destination")String destination, @PathParam("id")String id) {
+    public void deleteConsumer(@PathParam("destination")String destination, @PathParam("id")Integer id) throws JMSException {
         getService().deleteConsumer(createDestination(destination), id);
     }
 
