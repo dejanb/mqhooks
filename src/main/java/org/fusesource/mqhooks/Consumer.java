@@ -16,6 +16,8 @@
  */
 package org.fusesource.mqhooks;
 
+import com.ning.http.client.AsyncHttpClient;
+import com.ning.http.client.Response;
 import org.codehaus.jackson.annotate.JsonAutoDetect;
 import org.codehaus.jackson.annotate.JsonMethod;
 import org.codehaus.jackson.annotate.JsonProperty;
@@ -25,10 +27,14 @@ import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageConsumer;
 import javax.jms.MessageListener;
+import javax.jms.TextMessage;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import java.awt.*;
+import java.io.IOException;
 import java.net.URL;
+import java.util.concurrent.Future;
 
 @JsonAutoDetect({JsonMethod.NONE})
 @Produces({MediaType.APPLICATION_JSON})
@@ -41,6 +47,8 @@ public class Consumer {
     URL url;
 
     MessageConsumer consumer;
+
+    Service service;
 
     public Integer getId() {
         return id;
@@ -66,9 +74,27 @@ public class Consumer {
         consumer.setMessageListener(new MessageListener() {
             @Override
             public void onMessage(Message message) {
-                System.out.println(url + " <- " + message);
+                try {
+                    if (message instanceof TextMessage) {
+                        System.out.println(((TextMessage)message).getText().trim() + " -> " + url.toString());
+                        AsyncHttpClient.BoundRequestBuilder request = service.getHttpClient().preparePost(url.toString());
+                        request.setBody(((TextMessage) message).getText());
+                        Future<Response> result = request.execute();
+                        Response response = result.get();
+                        System.out.println(response.getStatusCode() + " " + response.getStatusText() + " " + response.getResponseBody());
+                    }
+                    //TODO handle other message types
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    //TODO should we use transactions instead?
+                    throw new RuntimeException(e);
+                }
             }
         });
         this.consumer = consumer;
+    }
+
+    public void setService(Service service) {
+        this.service = service;
     }
 }

@@ -16,6 +16,7 @@
  */
 package org.fusesource.mqhooks;
 
+import com.ning.http.client.AsyncHttpClient;
 import com.sun.jersey.spi.resource.Singleton;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.activemq.command.ActiveMQQueue;
@@ -37,6 +38,7 @@ public class Service {
     Map<Destination, HashMap<Integer, Consumer>> consumers = new HashMap<Destination, HashMap<Integer, Consumer>>();
     AtomicInteger id = new AtomicInteger(1);
     JMSMessagingAgent messagingAgent;
+    AsyncHttpClient httpClient = new AsyncHttpClient();
 
     public Service() {
         //TODO config mechanism for connection factory
@@ -54,6 +56,7 @@ public class Service {
     }
 
     public Integer addConsumer(Destination destination, Consumer consumer) throws JMSException {
+        consumer.setService(this);
         consumer.setConsumer(messagingAgent.createConsumer(destination));
         consumer.setId(id.getAndIncrement());
         HashMap<Integer, Consumer> consumerList = getConsumers(destination);
@@ -68,4 +71,7 @@ public class Service {
         }
     }
 
+    public AsyncHttpClient getHttpClient() {
+        return httpClient;
+    }
 }

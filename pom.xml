@@ -25,6 +25,8 @@
     <name>mqhooks</name>
 
     <properties>
+        <activemq-version>5.6.0</activemq-version>
+        <ahc-version>1.7.5</ahc-version>
         <jetty-version>7.6.1.v20120215</jetty-version>
         <jersey-version>1.8</jersey-version>
         <jetty.port>8080</jetty.port>
@@ -42,15 +44,27 @@
             <version>${jersey-version}</version>
         </dependency>
         <dependency>
+            <groupId>org.apache.activemq</groupId>
+            <artifactId>activemq-all</artifactId>
+            <version>${activemq-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.ning</groupId>
+            <artifactId>async-http-client</artifactId>
+            <version>${ahc-version}</version>
+        </dependency>
+        <!-- TEST -->
+        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.8.2</version>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.apache.activemq</groupId>
-            <artifactId>activemq-all</artifactId>
-            <version>5.6.0</version>
+            <groupId>org.eclipse.jetty.aggregate</groupId>
+            <artifactId>jetty-all-server</artifactId>
+            <version>7.6.1.v20120215</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
     <repositories>
